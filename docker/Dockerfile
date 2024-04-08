@@ -14,4 +14,4 @@ RUN apt-get update && \
     feh
 WORKDIR /root/opencv
 
-RUN pip3 install opencv-python==4.5.5.64
+RUN pip3 install opencv-python
