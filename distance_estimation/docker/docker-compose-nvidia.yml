@@ -1,0 +1,25 @@
+version: '2.4'
+services:
+  yolo9_v2:
+    container_name: yolo9
+    image: yolo_v9:latest
+    runtime: nvidia
+    environment:
+        # ROS_IP: $ROS_IP
+        # ROS_HOSTNAME: $ROS_HOSTNAME
+        # ROS_MASTER_URI: $ROS_MASTER_URI
+        # WAIT_FOR_ROSCORE: 0
+        DISPLAY: $DISPLAY
+        QT_X11_NO_MITSHM: '1'
+        NVIDIA_VISIBLE_DEVICES: all
+        NVIDIA_DRIVER_CAPABILITIES: compute,video,utility,graphics
+    network_mode: host
+    stdin_open: true
+    privileged: true
+    volumes:
+        - /tmp/.X11-unix:/tmp/.X11-unix
+        - $HOME/.Xauthority:/root/.Xauthority
+        - ../src/main.py:/root/yolov9/main.py
+        - ../data_kitti:/root/yolov9/data_kitti
+    # command: roslaunch yolov9_ros detect.launch sub_image:=/xtion/rgb/image 
+    command: bash
