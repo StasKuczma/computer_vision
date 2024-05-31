@@ -1,7 +1,7 @@
-version: '2.4'
+version: '2.5'
 services:
-  yolo9_v2:
-    container_name: yolo9
+  yolo_v9:
+    container_name: yolo_v9
     image: yolo_v9:latest
     runtime: nvidia
     environment:
@@ -19,7 +19,8 @@ services:
     volumes:
         - /tmp/.X11-unix:/tmp/.X11-unix
         - $HOME/.Xauthority:/root/.Xauthority
-        - ../src/main.py:/root/yolov9/main.py
+        - ../src/detection.py:/root/yolov9/detection.py
+        - ../src/estimation.py:/root/yolov9/estimation.py
         - ../data_kitti:/root/yolov9/data_kitti
     # command: roslaunch yolov9_ros detect.launch sub_image:=/xtion/rgb/image 
     command: bash

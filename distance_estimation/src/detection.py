@@ -53,8 +53,8 @@ def run(
     #hardcoded values
     classes = 2 
     name='kitti_yolo'
-    save_txt = True
-    source='./data_kitti/images/'
+    # save_txt = True
+    source='./data_kitti/kitti_gt/images/'
     weights = './yolov9-c-converted.pt'
     imgsz=(640, 640)
 
@@ -118,8 +118,6 @@ def run(
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
 
-                # print(det)
-
                 # Print results
                 for c in det[:, 5].unique():
                     n = (det[:, 5] == c).sum()  # detections per class
@@ -128,12 +126,11 @@ def run(
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
                     if save_txt:  # Write to file    
-                        xyxy1= (torch.tensor(xyxy).view(1, 4)).view(-1).tolist()
-                        line1 = (cls, *xyxy1, conf) if save_conf else (cls, *xyxy1)  # label format
-                        # print(line)
-                        with open(f'{txt_path}.txt', 'a') as f:
-                            f.write(('%g ' * len(line1)).rstrip() % line1 + '\n')
+                        xyxy_to_save= (torch.tensor(xyxy).view(1, 4)).view(-1).tolist()
+                        to_txt = (cls, *xyxy_to_save, conf) if save_conf else (cls, *xyxy_to_save)  # label format
 
+                        with open(f'{txt_path}.txt', 'a') as f:
+                            f.write(('%g ' * len(to_txt)).rstrip() % to_txt + '\n')
 
                     if save_img or save_crop or view_img:  # Add bbox to image
                         c = int(cls)  # integer class
@@ -142,25 +139,12 @@ def run(
                     if save_crop:
                         save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
 
-            # Stream results
-            im0 = annotator.result()
-            if view_img:
-                if platform.system() == 'Linux' and p not in windows:
-                    windows.append(p)
-                    cv2.namedWindow(str(p), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
-                    cv2.resizeWindow(str(p), im0.shape[1], im0.shape[0])
-                cv2.imshow(str(p), im0)
-                cv2.waitKey(0)  # 1 millisecond
 
             # Save results (image with detections)
             if save_img:
                 if dataset.mode == 'image':
                     cv2.imwrite(save_path, im0)
 
-        # Print time (inference-only)
-        # LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
-        # if len(det):
-        #     print(int(det[0, 1]))
     # Print results
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
     LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
@@ -182,7 +166,7 @@ def parse_opt():
     parser.add_argument('--max-det', type=int, default=1000, help='maximum detections per image')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true', help='show results')
-    parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
+    parser.add_argument('--save-txt', action='store_true', help='save results to *.txt', default=True)
     parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
     parser.add_argument('--save-crop', action='store_true', help='save cropped prediction boxes')
     parser.add_argument('--nosave', action='store_true', help='do not save images/videos')
